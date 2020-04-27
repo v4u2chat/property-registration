@@ -21,7 +21,7 @@ TYPE="$5"
 : ${TYPE="basic"}
 
 LANGUAGE=`echo "$LANGUAGE" | tr [:upper:] [:lower:]`
-ORGS="iit mhrd upgrad"
+ORGS="registrar users"
 TIMEOUT=15
 
 if [ "$TYPE" = "basic" ]; then
@@ -37,15 +37,15 @@ echo "New Version : "$VERSION
 
 ## Install new version of chaincode on peer0 of all 3 orgs making them endorsers
 echo "Updating chaincode on peer0.iit.certification-network.com ..."
-installChaincode 0 'iit' $VERSION
+installChaincode 0 'registrar' $VERSION
 echo "Updating chaincode on peer0.mhrd.certification-network.com ..."
-installChaincode 0 'mhrd' $VERSION
+installChaincode 1 'registrar' $VERSION
 echo "Updating chaincode on peer0.upgrad.certification-network.com ..."
-installChaincode 0 'upgrad' $VERSION
+installChaincode 0 'users' $VERSION
 
 # Upgrade chaincode on the channel using peer0.iit
 echo "Upgrading chaincode on channel using peer0.iit.certification-network.com ..."
-upgradeChaincode 0 'iit' $VERSION
+upgradeChaincode 0 'registrar' $VERSION
 
 echo
 echo "========= All GOOD, Chaincode CERTNET Is Now Updated To Version '$VERSION' =========== "

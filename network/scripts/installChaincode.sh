@@ -36,17 +36,17 @@ echo "Channel name : "$CHANNEL_NAME
 . scripts/utils.sh
 
 ## Install new version of chaincode on peer0 of all 3 orgs making them endorsers
-echo "Installing chaincode on peer0.registrar.property-registration-network.com.com ..."
+echo "Installing chaincode on peer0.registrar.property-registration-network.com ..."
 installChaincode 0 'registrar' $VERSION
-echo "Installing chaincode on peer1.registrar.property-registration-network.com.com ..."
+echo "Installing chaincode on peer1.registrar.property-registration-network.com ..."
 installChaincode 1 'registrar' $VERSION
-echo "Installing chaincode on peer0.users.property-registration-network.com.com ..."
+echo "Installing chaincode on peer0.users.property-registration-network.com ..."
 installChaincode 0 'users' $VERSION
 # echo "Installing chaincode on peer0.upgrad.property-registration-network.com.com ..."
 # installChaincode 0 'upgrad' $VERSION
 
 # Instantiate chaincode on the channel using peer0.registrar
-echo "Instantiating chaincode on channel using peer0.registrar.property-registration-network.com.com ..."
+echo "Instantiating chaincode on channel using peer0.registrar.property-registration-network.com ..."
 instantiateChaincode 0 'registrar' $VERSION
 
 echo

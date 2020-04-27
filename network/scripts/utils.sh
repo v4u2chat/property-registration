@@ -31,6 +31,10 @@ setOrdererGlobals() {
 setGlobals() {
   PEER=$1
   ORG=$2
+  
+  echo "PEER : "$PEER
+  echo "ORG : "$ORG
+
   if [ "$ORG" == 'registrar' ]; then
     CORE_PEER_LOCALMSPID="registrarMSP"
     CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_REGISTRAR_CA
