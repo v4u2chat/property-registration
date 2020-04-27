@@ -1,6 +1,4 @@
-**Introduction**
-
-Welcome to the course project on 'Hyperledger Fabric'. As a part of this course project, you will build a solution for 'Property Registration System' using Hyperledger Fabric.
+# 'Property Registration System' using Hyperledger Fabric.
 
  
 
