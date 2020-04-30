@@ -3,20 +3,27 @@
 
 const {Contract} = require('fabric-contract-api');
 
-const Utils = require('./utils.js');
+const transactionMap = {
+	'upg100' : 100,
+	'upg500' : 500,
+	'upg1000' : 1000
+};
+
+const propertyStatusMap = {
+	'requested' : 'REQUESTED',
+	'registered' : 'REGISTERED',
+	'onSale' : 'ON_SALE'
+};
 
 
 class UserContract extends Contract {
 
-    constructor() {
-		// Provide a custom name to refer to this smart contract
-		super('org.property-registration-network.regnet.usercontract');
-    }
-    
-
+	constructor() {
+		super('org.property-registration-network.regnet');	// Provide a custom name to refer to this smart contract
+    }    
     async instantiate(ctx) {
-		console.log('Regnet Smart Contract Instantiated');
-    }
+		console.log('Regnet User Smart Contract Instantiated');
+	}
 
     /**
 	 * A user registered on the network initiates a transaction to request the registrar to store their details/credentials on the ledger.
@@ -33,12 +40,9 @@ class UserContract extends Contract {
 	 */
 	async requestNewUser(ctx, name, email,phoneNo, aadhaarNo) {
 		
-		const userKey = Utils.generateUserCompositeUserKey(name,aadhaarNo);	// Create a new composite key for the new User account
-		
-		let existingUserObject = Utils.getStateFromLedger(ctx,userKey);	// Fetch student with given ID from blockchain
-		
-		// Make sure User does not already exist.
-		if (existingUserObject !== undefined) {	
+		const userKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.user', [name,aadhaarNo]);	// Create a new composite key for the new User account
+		let dataBuffer = await ctx.stub.getState(userKey).catch(err => console.log(err));
+		if (dataBuffer.toString()) {
 			throw new Error('Invalid User Details. An user with this name & aadhaarNo already exists.');
 		} else {
 			// Create a user object to be stored in blockchain
@@ -46,6 +50,7 @@ class UserContract extends Contract {
 				aadhaarNo: aadhaarNo,
 				name: name,
 				email: email,
+				phoneNo:phoneNo,
 				state: 'REQUESTED',
 				createdBy: ctx.clientIdentity.getID(),
 				createdAt: new Date(),
@@ -75,13 +80,13 @@ class UserContract extends Contract {
 	 */
 	async rechargeAccount(ctx, name, aadhaarNo,bankTransactionId) {
 
-		let userObject = Utils.getStateFromLedger(ctx,Utils.generateUserCompositeUserKey(name,aadhaarNo));
-		if (userObject == undefined) {
+		const userKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.user', [name,aadhaarNo]);
+		let dataBuffer = await ctx.stub.getState(userKey).catch(err => console.log(err));
+		if (!dataBuffer.toString()) {
 			throw new Error('Invalid User Details. No user exists with provided name & aadhaarNo combination.');
 		} else {
-
 			if(transactionMap.get(bankTransactionId)){
-				userObject.put('upgradCoins',userObject.get('upgradCoins')+Utils.transactionMap.get(bankTransactionId));
+				userObject.put('upgradCoins',userObject.get('upgradCoins')+ transactionMap.get(bankTransactionId));
 				await ctx.stub.putState(userKey, Buffer.from(JSON.stringify(userObject)));
 				return userObject;	// Return value of new user account created to user
 	
@@ -101,8 +106,15 @@ class UserContract extends Contract {
      * @param aadhaarNo - Aadhaar No of the User
 	 * @returns The transaction will return the current state of requested user.
 	 */
-	async viewUser(ctx, name, aadhaarNo) {
-		return Utils.getStateFromLedger(ctx,Utils.generateUserCompositeUserKey(name,aadhaarNo));
+	async viewUser(ctx, name, aadhaarNo) {		
+
+		const userKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.user', [name,aadhaarNo]);
+		let dataBuffer = await ctx.stub.getState(userKey).catch(err => console.log(err));
+		if (!dataBuffer.toString()) {
+			throw new Error('Invalid User Details. No user exists with provided name & aadhaarNo combination.');
+		} else {
+			return JSON.parse(dataBuffer.toString());
+		}
 	}
 
 	/**
@@ -122,22 +134,21 @@ class UserContract extends Contract {
 	 */
 	async propertyRegistrationRequest(ctx,propertyId,price,status,name,aadhaarNo){
 
-		let userKey = Utils.generateUserCompositeUserKey(name,aadhaarNo);
-		let userObject = Utils.getStateFromLedger(ctx,userKey);
-
-		let propertyKey = Utils.generatePropertyCompositeUserKey(propertyId);
-		let propertyObject = Utils.getStateFromLedger(ctx,propertyKey);
-
-		
-		if (propertyObject !== undefined) {	// Make sure Property does not already exist.
+		// Make sure Property does not already exist.
+		let propertyKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property', [propertyId]);
+		let propDataBuffer = await ctx.stub.getState(propertyKey).catch(err => console.log(err));
+		if (!propDataBuffer.toString()) {
 			throw new Error('Invalid Property Details. We already have a property registered with us for the given Property ID');
-		} 
-
-		if (userObject == undefined) {	// Make sure User does exist.
+		}
+		// Make sure User does exist.
+		const userKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.user', [name,aadhaarNo]);
+		let userDataBuffer = await ctx.stub.getState(userKey).catch(err => console.log(err));
+		if (!userDataBuffer.toString()) {
 			throw new Error('Invalid User Details. No user exists with provided name & aadhaarNo combination.');
 		} 
 
-		if(propertyStatusMap.get(status)){	// Make sure valid Status is provided
+		// Make sure valid Status is provided
+		if(propertyStatusMap.get(status)){	
 			throw new Error('Invalid Property Status : ' + status + '.');
 		}
 
@@ -169,15 +180,13 @@ class UserContract extends Contract {
 	 * @returns The transaction will return the current state of any property.
 	 */
 	async viewProperty(ctx,propertyId){
-		let propertyKey = Utils.generatePropertyCompositeUserKey(propertyId);
-		let propertyObject = Utils.getStateFromLedger(ctx,propertyKey);
-
-		if (propertyObject !== undefined) {	// Make sure Property does not already exist.
+		let propertyKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property', [propertyId]);
+		let dataBuffer = await ctx.stub.getState(propertyKey).catch(err => console.log(err));
+		if (!dataBuffer.toString()) {// Make sure Property does not already exist.
 			throw new Error('Invalid Property Details. We already have a property registered with us for the given Property ID');
 		} 
-		return propertyObject;
+		return JSON.parse(dataBuffer.toString());
 	}
-
 
 	/**
 	 * This function is invoked to change the status of the property. 
@@ -193,25 +202,26 @@ class UserContract extends Contract {
 	 */
 	async updateProperty(ctx,propertyId,status,name,aadhaarNo){
 
-		let userKey = Utils.generateUserCompositeUserKey(name,aadhaarNo);
-		let userObject = Utils.getStateFromLedger(ctx,userKey);
-
-		let propertyKey = Utils.generatePropertyCompositeUserKey(propertyId);
-		let propertyObject = Utils.getStateFromLedger(ctx,propertyKey);
-
-		if (propertyObject !== undefined) {	// Make sure Property does not already exist.
+		// Make sure Property does not already exist.
+		let propertyKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property', [propertyId]);
+		let propDataBuffer = await ctx.stub.getState(propertyKey).catch(err => console.log(err));
+		if (!propDataBuffer.toString()) {
 			throw new Error('Invalid Property Details. We already have a property registered with us for the given Property ID');
-		} 
-
-		if (userObject == undefined) {	// Make sure User does exist.
+		}
+		// Make sure User does exist.
+		const userKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.user', [name,aadhaarNo]);
+		let userDataBuffer = await ctx.stub.getState(userKey).catch(err => console.log(err));
+		if (!userDataBuffer.toString()) {
 			throw new Error('Invalid User Details. No user exists with provided name & aadhaarNo combination.');
 		} 
 
-		if(propertyStatusMap.get(status)){	// Make sure valid Status is provided
+		// Make sure valid Status is provided
+		if(propertyStatusMap.get(status)){	
 			throw new Error('Invalid Property Status : ' + status + '.');
 		}
 
-		if(userKey == propertyObject.get('owner')){
+		let propertyObject = JSON.parse(dataBuffer.toString());
+		if(userKey == propertyObject.get('owner')){	// Make sure ONLY property owner is making the changes
 			propertyObject.put('status', propertyStatusMap.get(status));
 			propertyObject.put('updatedBy',ctx.clientIdentity.getID());	
 			propertyObject.put('updatedAt',new Date());
@@ -239,25 +249,28 @@ class UserContract extends Contract {
 	 */
 	async purchaseProperty(ctx,propertyId,name,aadhaarNo){
 
-		let userKey = Utils.generateUserCompositeUserKey(name,aadhaarNo);
-		let userObject = Utils.getStateFromLedger(ctx,userKey);
-
-		let propertyKey = Utils.generatePropertyCompositeUserKey(propertyId);
-		let propertyObject = Utils.getStateFromLedger(ctx,propertyKey);
-
-		if (propertyObject !== undefined) {	// Make sure Property does not already exist.
+		// Make sure Property does not already exist.
+		let propertyKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property', [propertyId]);
+		let propDataBuffer = await ctx.stub.getState(propertyKey).catch(err => console.log(err));
+		if (!propDataBuffer.toString()) {
 			throw new Error('Invalid Property Details. We already have a property registered with us for the given Property ID');
-		} 
-
-		if (userObject == undefined) {	// Make sure User does exist.
+		}
+		// Make sure User does exist.
+		const userKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.user', [name,aadhaarNo]);
+		let userDataBuffer = await ctx.stub.getState(userKey).catch(err => console.log(err));
+		if (!userDataBuffer.toString()) {
 			throw new Error('Invalid User Details. No user exists with provided name & aadhaarNo combination.');
 		} 
 
-		if(propertyObject.get('status')!=propertyStatusMap.get('onSale')){	// Make sure Propert is ON SALE
+		// Make sure Propert is ON SALE
+		let propertyObject = JSON.parse(dataBuffer.toString());
+		if(propertyObject.get('status')!=propertyStatusMap.get('onSale')){	
 			throw new Error('Property is NOT FOR SALE');
 		}
 
 		if(userKey != propertyObject.get('owner')){
+
+			let userObject = JSON.parse(userDataBuffer.toString());
 
 			if(userObject.get('upgradCoins') >= propertyObject.get('price')){
 
@@ -278,3 +291,5 @@ class UserContract extends Contract {
 		}
 	}
 }
+
+module.exports = UserContract;

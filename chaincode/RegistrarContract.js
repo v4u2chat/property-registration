@@ -10,7 +10,7 @@ class RegistrarContract extends Contract {
 		super('org.property-registration-network.regnet');
     }    
     async instantiate(ctx) {
-		console.log('RegistrarContract Instantiated');
+		console.log('Regnet Registrar Smart Contract Instantiated');
 	}
 	
 	/**
