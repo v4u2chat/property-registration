@@ -93,7 +93,8 @@ peer chaincode instantiate -o orderer.property-registration-network.com:7050 -C 
 
 
 
-peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:requestNewUser","Rajesh","v4u2chat@gmail.com","9866776600","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:requestNewUser","Rajesh","v4u2chat@gmail.com","9866776600","0000-0000-0000"]}'
+
 peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewUser","Rajesh","0000-0000-0000"]}'
 peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewProperty","1"]}'
 peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approveNewUser","Rajesh","0000-0000-0000"]}'

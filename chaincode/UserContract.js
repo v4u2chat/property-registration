@@ -19,7 +19,7 @@ const propertyStatusMap = {
 class UserContract extends Contract {
 
 	constructor() {
-		super('org.property-registration-network.regnet');	// Provide a custom name to refer to this smart contract
+		super('org.property-registration-network.regnet.usercontract');	// Provide a custom name to refer to this smart contract
     }    
     async instantiate(ctx) {
 		console.log('Regnet User Smart Contract Instantiated');
