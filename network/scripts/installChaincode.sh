@@ -21,7 +21,7 @@ TYPE="$5"
 : ${TYPE="basic"}
 
 LANGUAGE=`echo "$LANGUAGE" | tr [:upper:] [:lower:]`
-ORGS="registrar users upgrad"
+ORGS="registrar users"
 TIMEOUT=15
 
 if [ "$TYPE" = "basic" ]; then

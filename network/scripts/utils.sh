@@ -148,7 +148,7 @@ instantiateChaincode() {
     set +x
   else
     set -x
-    peer chaincode instantiate -o orderer.property-registration-network.com:7050 --tls "$CORE_PEER_TLS_ENABLED" --cafile $ORDERER_CA -C $CHANNEL_NAME -n regnet -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member','upgradMSP.member')" >&log.txt
+    peer chaincode instantiate -o orderer.property-registration-network.com:7050 --tls "$CORE_PEER_TLS_ENABLED" --cafile $ORDERER_CA -C $CHANNEL_NAME -n regnet -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member')" >&log.txt
     res=$?
     set +x
   fi
@@ -233,7 +233,7 @@ chaincodeInvoke() {
   # it using the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode invoke -o orderer.property-registration-network.com:7050 -C $CHANNEL_NAME -n regnet $PEER_CONN_PARMS -c '{"Args":["org.property-registration-network.regnet:createStudent","0001","Aakash Bansal","connect@aakashbansal.com","15"]}' >&log.txt
+    peer chaincode invoke -o orderer.property-registration-network.com:7050 -C $CHANNEL_NAME -n regnet $PEER_CONN_PARMS -c '{"Args":["org.property-registration-network.regnet:createStudent","0001","Aakash Bansal","Rajesh.Gadiparti@gmail.com","15"]}' >&log.txt
     res=$?
     set +x
   else

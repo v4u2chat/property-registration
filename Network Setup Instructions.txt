@@ -9,3 +9,106 @@
 
 4. Command to install and instantiate the chaincode on the network
 ./fabricNetwork.sh install
+
+
+
+1. Command to generate the crypto-materials:
+./fabricNetwork.sh generate
+
+2. Command to start the network
+./fabricNetwork.sh up
+
+3. Command to kill the network
+./fabricNetwork.sh down
+
+4. Command to install and instantiate the chaincode on the network
+./fabricNetwork.sh install
+
+ssh upgrad@127.0.0.1 -p 2222
+
+
+/home/upgrad/Desktop/shared-workspace/certification-network
+
+
+docker ps -a
+docker-compose -f ./docker-compose.yml up -d
+
+#Log in to the CLI Container
+docker exec -it cli /bin/bash
+
+#Creating the Channel
+peer channel create -o orderer.certification-network.com:7050 -c certificationchannel -f ./channel-artifacts/channel.tx
+
+# Peer Joining
+peer channel join -b certificationchannel.block
+
+CORE_PEER_ADDRESS=peer1.iit.certification-network.com:8051
+
+peer channel join -b certificationchannel.block
+
+
+CORE_PEER_LOCALMSPID="mhrdMSP"
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/mhrd.certification-network.com/users/Admin@mhrd.certification-network.com/msp
+CORE_PEER_ADDRESS=peer0.mhrd.certification-network.com:9051
+peer channel join -b certificationchannel.block
+
+
+CORE_PEER_ADDRESS=peer1.mhrd.certification-network.com:10051
+peer channel join -b certificationchannel.block
+
+
+CORE_PEER_LOCALMSPID="upgradMSP"
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/upgrad.certification-network.com/users/Admin@upgrad.certification-network.com/msp
+CORE_PEER_ADDRESS=peer0.upgrad.certification-network.com:11051
+peer channel join -b certificationchannel.block
+
+CORE_PEER_ADDRESS=peer1.upgrad.certification-network.com:12051
+peer channel join -b certificationchannel.block
+
+
+#Anchor Peer Updates
+
+CORE_PEER_LOCALMSPID="iitMSP"
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/iit.certification-network.com/users/Admin@iit.certification-network.com/msp
+CORE_PEER_ADDRESS=peer0.iit.certification-network.com:7051
+peer channel update -o orderer.certification-network.com:7050 -c certificationchannel -f ./channel-artifacts/iitMSPanchors.tx
+
+CORE_PEER_LOCALMSPID="mhrdMSP"
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/mhrd.certification-network.com/users/Admin@mhrd.certification-network.com/msp
+CORE_PEER_ADDRESS=peer0.mhrd.certification-network.com:9051
+peer channel update -o orderer.certification-network.com:7050 -c certificationchannel -f ./channel-artifacts/mhrdMSPanchors.tx
+
+
+CORE_PEER_LOCALMSPID="upgradMSP"
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/upgrad.certification-network.com/users/Admin@upgrad.certification-network.com/msp
+CORE_PEER_ADDRESS=peer0.upgrad.certification-network.com:11051
+peer channel update -o orderer.certification-network.com:7050 -c certificationchannel -f ./channel-artifacts/upgradMSPanchors.tx
+
+
+
+docker exec -it cli /bin/bash
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C $CHANNEL_NAME -n regnet $PEER_CONN_PARMS -c '{"Args":["org.property-registration-network.regnet:createStudent","0001","Aakash Bansal","Rajesh.Gadiparti@gmail.com","15"]}' >&log.txt
+peer chaincode instantiate -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -l node -v 1.1 -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P 'OR ('\''registrarMSP.member'\'','\''usersMSP.member'\'')'
+peer chaincode instantiate -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -l node -v 1.1 -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P 'OR ('\''registrarMSP.member'\'','\''usersMSP.member'\'')
+
+
+
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:requestNewUser","Rajesh","v4u2chat@gmail.com","9866776600","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewUser","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewProperty","1"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approveNewUser","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approvePropertyRegistration","1"]}'
+
+org.property-registration-network.regnet:
+
+peer chaincode invoke -o orderer.certification-network.com:7050 		-C certificationchannel -n certnet -c '{"Args":["org.certification-network.certnet:createStudent","0001","Aakash Bansal","connect@aakashbansal.com"]}'
+
+
+
+
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.user:requestNewUser","Rajesh","v4u2chat@gmail.com","9866776600","0000-0000-0000"]}'
+
+peer chaincode invoke -o orderer.certification-network.com:7050 -C certificationchannel -n certnet -c '{"Args":["org.certification-network.certnet:createStudent","0001","Aakash Bansal","connect@aakashbansal.com"]}'
+
+peer chaincode invoke -o orderer.certification-network.com:7050 -C certificationchannel -n certnet -c '{"Args":["org.certification-network.certnet:getStudent","0001"]}'
+

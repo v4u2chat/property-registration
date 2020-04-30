@@ -14,7 +14,7 @@ DELAY="$2"
 LANGUAGE="$3"
 VERSION="$4"
 TYPE="$5"
-: ${CHANNEL_NAME:="certificationchannel"}
+: ${CHANNEL_NAME:="registrationchannel"}
 : ${DELAY:="5"}
 : ${LANGUAGE:="node"}
 : ${VERSION:=1.1}
@@ -36,15 +36,18 @@ echo "New Version : "$VERSION
 . scripts/utils.sh
 
 ## Install new version of chaincode on peer0 of all 3 orgs making them endorsers
-echo "Updating chaincode on peer0.iit.certification-network.com ..."
+        
+echo "Updating chaincode on peer0.registrar.property-registration-network.com ..."
 installChaincode 0 'registrar' $VERSION
-echo "Updating chaincode on peer0.mhrd.certification-network.com ..."
+
+echo "Updating chaincode on peer1.registrar.property-registration-network.com ..."
 installChaincode 1 'registrar' $VERSION
-echo "Updating chaincode on peer0.upgrad.certification-network.com ..."
+
+echo "Updating chaincode on peer0.users.property-registration-network.com..."
 installChaincode 0 'users' $VERSION
 
 # Upgrade chaincode on the channel using peer0.iit
-echo "Upgrading chaincode on channel using peer0.iit.certification-network.com ..."
+echo "Upgrading chaincode on channel using peer0.registrar.property-registration-network.com ..."
 upgradeChaincode 0 'registrar' $VERSION
 
 echo
