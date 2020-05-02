@@ -173,10 +173,14 @@ upgradeChaincode() {
     set -x
     peer chaincode upgrade -o orderer.property-registration-network.com:7050 -C $CHANNEL_NAME -n regnet -l ${LANGUAGE} -v ${VERSION} -p ${CC_SRC_PATH} -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member','upgradMSP.member')" >&log.txt
     res=$?
+    peer chaincode upgrade -o orderer.property-registration-network.com:7050 -C $CHANNEL_NAME -n regnet -l ${LANGUAGE} -v ${VERSION} -p ${CC_SRC_PATH} -c '{"Args":["org.property-registration-network.regnet.usercontract:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member','upgradMSP.member')" >&log.txt
+    res=$?
     set +x
   else
     set -x
     peer chaincode upgrade -o orderer.property-registration-network.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n regnet -l ${LANGUAGE} -v ${VERSION} -p ${CC_SRC_PATH} -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member','upgradMSP.member')" >&log.txt
+    res=$?
+    peer chaincode upgrade -o orderer.property-registration-network.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n regnet -l ${LANGUAGE} -v ${VERSION} -p ${CC_SRC_PATH} -c '{"Args":["org.property-registration-network.regnet.usercontract:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member','upgradMSP.member')" >&log.txt
     res=$?
     set +x
   fi

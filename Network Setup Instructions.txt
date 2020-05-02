@@ -91,16 +91,43 @@ peer chaincode invoke -o orderer.property-registration-network.com:7050 -C $CHAN
 peer chaincode instantiate -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -l node -v 1.1 -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P 'OR ('\''registrarMSP.member'\'','\''usersMSP.member'\'')'
 peer chaincode instantiate -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -l node -v 1.1 -c '{"Args":["org.property-registration-network.regnet:instantiate"]}' -P 'OR ('\''registrarMSP.member'\'','\''usersMSP.member'\'')
 
-
+docker exec -it cli /bin/bash
+export CORE_PEER_LOCALMSPID=usersMSP
+export CORE_PEER_ADDRESS=peer0.users.property-registration-network.com:9051
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/users.property-registration-network.com/users/Admin@users.property-registration-network.com/msp
 
 peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:requestNewUser","Rajesh","v4u2chat@gmail.com","9866776600","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:requestNewUser","Prashanthi","prshanthi@gmail.com","9866776699","1111-1111-1111"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:rechargeUserAccount","Rajesh","0000-0000-0000","upg1000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:rechargeUserAccount","Prashanthi","1111-1111-1111","upg1000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:viewUser","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:viewUser","Prashanthi","1111-1111-1111"]}'
 
-peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewUser","Rajesh","0000-0000-0000"]}'
-peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewProperty","1"]}'
+
+
+
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:propertyRegistrationRequest","1","500","requested","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:propertyRegistrationRequest","2","50000","requested","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:viewProperty","1"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:updateProperty","1","onSale","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:updateProperty","1","onSale","Prashanthi","1111-1111-1111"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet.usercontract:purchaseProperty","1","Prashanthi","1111-1111-1111"]}'
+
+
+docker exec -it cli /bin/bash
+CORE_PEER_LOCALMSPID="registrarMSP"
+CORE_PEER_ADDRESS=peer0.registrar.property-registration-network.com:7051
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/crypto/peerOrganizations/registrar.property-registration-network.com/users/Admin@registrar.property-registration-network.com/msp
+
 peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approveNewUser","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approveNewUser","Prashanthi","1111-1111-1111"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewUser","Rajesh","0000-0000-0000"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approvePropertyRegistration","1"]}'
+peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:viewProperty","1"]}'
+
 peer chaincode invoke -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -c '{"Args":["org.property-registration-network.regnet:approvePropertyRegistration","1"]}'
 
-org.property-registration-network.regnet:
+peer chaincode upgrade -o orderer.property-registration-network.com:7050 -C registrationchannel -n regnet -l node -v 1.1 -p /opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode/ -c '{"Args":["org.property-registration-network.regnet.usercontract:instantiate"]}' -P "OR ('registrarMSP.member','usersMSP.member','upgradMSP.member')" >&log.txt
 
 peer chaincode invoke -o orderer.certification-network.com:7050 		-C certificationchannel -n certnet -c '{"Args":["org.certification-network.certnet:createStudent","0001","Aakash Bansal","connect@aakashbansal.com"]}'
 

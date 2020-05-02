@@ -3,6 +3,12 @@
 
 const {Contract} = require('fabric-contract-api');
 
+const propertyStatusMap = {
+	'requested' : 'REQUESTED',
+	'registered' : 'REGISTERED',
+	'onSale' : 'ON_SALE'
+};
+
 class RegistrarContract extends Contract {
 
     constructor() {
@@ -54,10 +60,10 @@ class RegistrarContract extends Contract {
 				throw new Error('Invalid User Details. No user exists with provided name & aadhaarNo combination.');
 			} else {
 				let userObject = JSON.parse(dataBuffer.toString());
-				userObject.put('upgradCoins',0);
-				userObject.put('state','APPROVED');
-				userObject.put('updatedBy',ctx.clientIdentity.getID());
-				userObject.put('updatedAt',new Date());
+				userObject.upgradCoins = 0;
+				userObject.state = 'APPROVED';
+				userObject.updatedBy = ctx.clientIdentity.getID();
+				userObject.updatedAt = new Date();
 				
 				await ctx.stub.putState(userKey, Buffer.from(JSON.stringify(userObject)));
 				return userObject;	// Return value of new user account created to user
@@ -98,17 +104,18 @@ class RegistrarContract extends Contract {
 	async approvePropertyRegistration(ctx,propertyId){
 
 		if('registrarMSP'==ctx.clientIdentity.mspId){
-			let propertyKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property', [propertyId]);
-			let dataBuffer = await ctx.stub.getState(propertyKey).catch(err => console.log(err));
+			let propertyRequestKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property.request', [propertyId]);
+			let dataBuffer = await ctx.stub.getState(propertyRequestKey).catch(err => console.log(err));
 			if (!dataBuffer.toString()) {
 				throw new Error('Invalid Property Details. We already have a property registered with us for the given Property ID');
 			} else {
+
 				let propertyObject = JSON.parse(dataBuffer.toString());
+				propertyObject.status = propertyStatusMap['registered'];
+				propertyObject.updatedBy = ctx.clientIdentity.getID();	
+				propertyObject.updatedAt = new Date();
 
-				propertyObject.put('status', propertyStatusMap.get('registered'));
-				propertyObject.put('updatedBy',ctx.clientIdentity.getID());	
-				propertyObject.put('updatedAt',new Date());
-
+				let propertyKey = ctx.stub.createCompositeKey('org.property-registration-network.regnet.property', [propertyId]);
 				await ctx.stub.putState(propertyKey, Buffer.from(JSON.stringify(propertyObject)));
 				return propertyObject;
 			}
